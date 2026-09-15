@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2液配合・希釈計算</title>
+<style>
+*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;max-width:520px;margin:0 auto;padding:20px;background:#f5f5f5;color:#222}.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.08)}h1{font-size:22px;margin:0 0 18px}label{display:block;font-weight:700;margin:14px 0 6px}input{width:100%;padding:14px;font-size:20px;border:1px solid #ccc;border-radius:10px}button{width:100%;margin-top:18px;padding:15px;border:0;border-radius:10px;background:#222;color:#fff;font-size:18px;font-weight:700}.result{margin-top:20px;border-top:1px solid #ddd;padding-top:14px}.row{display:flex;justify-content:space-between;padding:10px 0;font-size:19px}.total{font-weight:700;font-size:21px}.formula{font-size:13px;color:#666;margin-top:12px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>2液配合・希釈計算</h1>
+<label for="total">総量（g）</label>
+<input id="total" type="number" value="1500" min="0" step="1">
+<label for="rate">希釈率（%）</label>
+<input id="rate" type="number" value="50" min="0" step="1">
+<button id="calcButton" type="button">計算する</button>
+<div class="result" id="result">
+<div class="row"><span>主材</span><b>500 g</b></div>
+<div class="row"><span>硬化剤</span><b>500 g</b></div>
+<div class="row"><span>希釈剤</span><b>500 g</b></div>
+<div class="row total"><span>合計</span><span>1500 g</span></div>
+</div>
+</div>
+<script>
+document.getElementById('calcButton').addEventListener('click', function(){
+  var total = parseFloat(document.getElementById('total').value);
+  var rate = parseFloat(document.getElementById('rate').value);
+  if (!isFinite(total) || !isFinite(rate) || total < 0 || rate < 0) {
+    document.getElementById('result').innerHTML='<p>総量と希釈率を正しく入力してください。</p>';
+    return;
+  }
+  var base = total / (1 + rate / 100);
+  var main = base / 2;
+  var hard = base / 2;
+  var thinner = total - base;
+  function g(x){ return Math.round(x); }
+  document.getElementById('result').innerHTML =
+    '<div class="row"><span>主材</span><b>'+g(main)+' g</b></div>'+
+    '<div class="row"><span>硬化剤</span><b>'+g(hard)+' g</b></div>'+
+    '<div class="row"><span>希釈剤</span><b>'+g(thinner)+' g</b></div>'+
+    '<div class="row total"><span>合計</span><span>'+g(main+hard+thinner)+' g</span></div>'+
+    '<div class="formula">主材＋硬化剤＝総量÷（1＋希釈率）<br>主材と硬化剤は1:1、残りを希釈剤としています。</div>';
+});
+</script>
+</body>
+</html>
