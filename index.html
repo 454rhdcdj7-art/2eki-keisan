@@ -5,44 +5,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>2液配合・希釈計算</title>
 <style>
-*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;max-width:520px;margin:0 auto;padding:20px;background:#f5f5f5;color:#222}.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.08)}h1{font-size:22px;margin:0 0 18px}label{display:block;font-weight:700;margin:14px 0 6px}input{width:100%;padding:14px;font-size:20px;border:1px solid #ccc;border-radius:10px}button{width:100%;margin-top:18px;padding:15px;border:0;border-radius:10px;background:#222;color:#fff;font-size:18px;font-weight:700}.result{margin-top:20px;border-top:1px solid #ddd;padding-top:14px}.row{display:flex;justify-content:space-between;padding:10px 0;font-size:19px}.total{font-weight:700;font-size:21px}.formula{font-size:13px;color:#666;margin-top:12px;line-height:1.6}
+*{box-sizing:border-box}body{margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;color:#222}
+.card{max-width:520px;margin:0 auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+h1{text-align:center;font-size:24px;margin:0 0 24px}label{display:block;font-weight:700;margin:16px 0 7px}
+input{width:100%;padding:13px;font-size:18px;border:1px solid #ccc;border-radius:10px}
+button{width:100%;margin-top:22px;padding:14px;border:0;border-radius:10px;font-size:18px;font-weight:700;background:#222;color:#fff}
+.result{margin-top:22px;padding:18px;background:#f1f1f1;border-radius:12px;line-height:1.9}.row{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:5px 0}.row:last-child{border-bottom:0}
+.note{font-size:13px;color:#666;margin-top:14px}
 </style>
 </head>
 <body>
 <div class="card">
 <h1>2液配合・希釈計算</h1>
 <label for="total">総量（g）</label>
-<input id="total" type="number" value="1500" min="0" step="1">
-<label for="rate">希釈率（%）</label>
-<input id="rate" type="number" value="50" min="0" step="1">
-<button id="calcButton" type="button">計算する</button>
-<div class="result" id="result">
-<div class="row"><span>主材</span><b>500 g</b></div>
-<div class="row"><span>硬化剤</span><b>500 g</b></div>
-<div class="row"><span>希釈剤</span><b>500 g</b></div>
-<div class="row total"><span>合計</span><span>1500 g</span></div>
+<input id="total" type="number" inputmode="decimal" min="0" step="0.1" placeholder="例：3000">
+<label for="dilution">希釈率（%）</label>
+<input id="dilution" type="number" inputmode="decimal" min="0" step="0.1" placeholder="例：20">
+<button onclick="calc()">計算する</button>
+<div id="result" class="result" style="display:none">
+<div class="row"><span>主材（2）</span><strong id="main"></strong></div>
+<div class="row"><span>硬化剤（1）</span><strong id="hardener"></strong></div>
+<div class="row"><span>主材＋硬化剤</span><strong id="base"></strong></div>
+<div class="row"><span>希釈剤</span><strong id="thinner"></strong></div>
+<div class="row"><span>希釈後の総量</span><strong id="finalTotal"></strong></div>
 </div>
+<div class="note">※ 希釈率は「主材＋硬化剤」の合計量に対する割合です。<br>※ 2：1の配合比は主材：硬化剤です。</div>
 </div>
 <script>
-document.getElementById('calcButton').addEventListener('click', function(){
-  var total = parseFloat(document.getElementById('total').value);
-  var rate = parseFloat(document.getElementById('rate').value);
-  if (!isFinite(total) || !isFinite(rate) || total < 0 || rate < 0) {
-    document.getElementById('result').innerHTML='<p>総量と希釈率を正しく入力してください。</p>';
-    return;
-  }
-  var base = total / (1 + rate / 100);
-  var main = base / 2;
-  var hard = base / 2;
-  var thinner = total - base;
-  function g(x){ return Math.round(x); }
-  document.getElementById('result').innerHTML =
-    '<div class="row"><span>主材</span><b>'+g(main)+' g</b></div>'+
-    '<div class="row"><span>硬化剤</span><b>'+g(hard)+' g</b></div>'+
-    '<div class="row"><span>希釈剤</span><b>'+g(thinner)+' g</b></div>'+
-    '<div class="row total"><span>合計</span><span>'+g(main+hard+thinner)+' g</span></div>'+
-    '<div class="formula">主材＋硬化剤＝総量÷（1＋希釈率）<br>主材と硬化剤は1:1、残りを希釈剤としています。</div>';
-});
+function calc(){
+ const total=parseFloat(document.getElementById('total').value), dilution=parseFloat(document.getElementById('dilution').value);
+ if(!Number.isFinite(total)||total<=0||!Number.isFinite(dilution)||dilution<0){alert('総量と希釈率を正しく入力してください。');return;}
+ const main=total*2/3, hardener=total/3, thinner=total*dilution/100, finalTotal=total+thinner;
+ const fmt=n=>Number.isInteger(n)?n.toLocaleString():n.toLocaleString(undefined,{maximumFractionDigits:1});
+ document.getElementById('main').textContent=fmt(main)+' g';
+ document.getElementById('hardener').textContent=fmt(hardener)+' g';
+ document.getElementById('base').textContent=fmt(total)+' g';
+ document.getElementById('thinner').textContent=fmt(thinner)+' g';
+ document.getElementById('finalTotal').textContent=fmt(finalTotal)+' g';
+ document.getElementById('result').style.display='block';
+}
 </script>
 </body>
 </html>
